@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>F.R.I.D.A.Y. Interface</title>
+    <style>
+        :root {
+            --neon-blue: #00f3ff;
+            --neon-dim: #004d52;
+            --bg-color: #050505;
+            --font-main: 'Courier New', Courier, monospace;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--neon-blue);
+            font-family: var(--font-main);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            text-transform: uppercase;
+        }
+
+        /* Фоновая сетка */
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                linear-gradient(rgba(0, 243, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 243, 255, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            z-index: -1;
+        }
+
+        /* Контейнер интерфейса */
+        .container {
+            width: 80%;
+            max-width: 600px;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Ядро ИИ */
+        .arc-reactor {
+            width: 150px;
+            height: 150px;
+            margin: 0 auto 40px;
+            position: relative;
+            border-radius: 50%;
+            border: 2px solid var(--neon-dim);
+            box-shadow: 0 0 15px var(--neon-dim), inset 0 0 15px var(--neon-dim);
+            transition: all 0.3s ease;
+        }
+
+        .arc-reactor::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60%;
+            height: 60%;
+            border-radius: 50%;
+            background: radial-gradient(circle, #fff, var(--neon-blue) 40%, transparent 70%);
+            opacity: 0.8;
+            box-shadow: 0 0 30px var(--neon-blue);
+        }
+
+        .arc-reactor .ring {
+            position: absolute;
+            top: -5px;
+            left: -5px;
+            right: -5px;
+            bottom: -5px;
+            border-radius: 50%;
+            border: 2px dashed var(--neon-blue);
+            animation: spin 10s linear infinite;
+        }
+
+        /* Анимации состояний */
+        .listening .arc-reactor {
+            box-shadow: 0 0 30px var(--neon-blue), inset 0 0 30px var(--neon-blue);
+            transform: scale(1.1);
+        }
+        .listening .arc-reactor::after {
+            animation: pulse-listen 1.5s infinite ease-in-out;
+        }
+
+        .speaking .arc-reactor {
+            box-shadow: 0 0 50px var(--neon-blue), inset 0 0 50px var(--neon-blue);
+        }
+        .speaking .arc-reactor::after {
+            animation: pulse-speak 0.2s infinite alternate;
+        }
+
+        /* Текстовые блоки */
+        .status-text {
+            font-size: 0.9rem;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+            color: rgba(0, 243, 255, 0.6);
+            min-height: 20px;
+        }
+
+        .user-input {
+            border: 1px solid var(--neon-dim);
+            background: rgba(0, 20, 20, 0.5);
+            padding: 15px;
+            margin-bottom: 10px;
+            min-height: 24px;
+            text-align: left;
+            color: #fff;
+            box-shadow: 0 0 10px rgba(0, 243, 255, 0.1);
+            font-size: 1rem;
+        }
+
+        .ai-response {
+            border: 1px solid var(--neon-blue);
+            background: rgba(0, 40, 50, 0.6);
+            padding: 15px;
+            min-height: 24px;
+            text-align: left;
+            color: var(--neon-blue);
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.2);
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 30px;
+        }
+
+        /* Кнопка */
+        .btn-main {
+            background: transparent;
+            color: var(--neon-blue);
+            border: 2px solid var(--neon-blue);
+            padding: 15px 40px;
+            font-family: var(--font-main);
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-main:hover {
+            background: var(--neon-blue);
+            color: #000;
+            box-shadow: 0 0 30px var(--neon-blue);
+        }
+
+        .btn-main:disabled {
+            border-color: #555;
+            color: #555;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        /* Кейфреймы анимаций */
+        @keyframes spin {
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse-listen {
+            0% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.5; }
+            50% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.5; }
+        }
+
+        @keyframes pulse-speak {
+            0% { opacity: 0.7; transform: translate(-50%, -50%) scale(1); }
+            100% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
+        }
+
+        /* Курсор печатной машинки */
+        .cursor {
+            display: inline-block;
+            width: 10px;
+            height: 1.1rem;
+            background-color: var(--neon-blue);
+            animation: blink 1s infinite;
+            vertical-align: bottom;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div id="wrapper" class="">
+            <div class="arc-reactor">
+                <div class="ring"></div>
+            </div>
+        </div>
+
+        <div class="status-text" id="status">SYSTEM STANDBY</div>
+
+        <div class="user-input">
+            <span style="color: #666;">INPUT: </span>
+            <span id="transcript-text"></span>
+        </div>
+
+        <div class="ai-response">
+            <span style="color: var(--neon-blue);">> </span>
+            <span id="response-text"></span><span class="cursor"></span>
+        </div>
+
+        <button class="btn-main" id="activate-btn">Активировать протокол</button>
+    </div>
+
+    <script>
+        // --- Конфигурация и переменные ---
+        const btn = document.getElementById('activate-btn');
+        const transcriptDisplay = document.getElementById('transcript-text');
+        const responseDisplay = document.getElementById('response-text');
+        const statusDisplay = document.getElementById('status');
+        const wrapper = document.getElementById('wrapper');
+
+        // Web Speech API
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const synth = window.speechSynthesis;
+        let recognition;
+        let voices = [];
+
+        // --- Инициализация голосов ---
+        function loadVoices() {
+            voices = synth.getVoices();
+        }
+
+        if (speechSynthesis.onvoiceschanged !== undefined) {
+            speechSynthesis.onvoiceschanged = loadVoices;
+        }
+        loadVoices();
+
+        // --- Логика распознавания ---
+        if (SpeechRecognition) {
+            recognition = new SpeechRecognition();
+            recognition.lang = 'ru-RU';
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+
+            recognition.onstart = () => {
+                setStatus('LISTENING...', 'listening');
+                transcriptDisplay.textContent = '';
+                responseDisplay.textContent = '';
+                btn.disabled = true;
+            };
+
+            recognition.onend = () => {
+                if (!wrapper.classList.contains('speaking')) {
+                    setStatus('PROCESSING COMPLETE', '');
+                    btn.disabled = false;
+                }
+            };
+
+            recognition.onresult = (event) => {
+                const text = event.results[0][0].transcript;
+                transcriptDisplay.textContent = text;
+                processCommand(text);
+            };
+
+            recognition.onerror = (event) => {
+                setStatus('ERROR: ' + event.error, '');
+                btn.disabled = false;
+                wrapper.classList.remove('listening');
+            };
+        } else {
+            responseDisplay.textContent = "Ваш браузер не поддерживает голосовое управление.";
+            btn.style.display = 'none';
+        }
+
+        // --- Обработчик команд (Brain) ---
+        function processCommand(command) {
+            const lowerCmd = command.toLowerCase().trim();
+            let answer = "";
+
+            if (lowerCmd.includes("привет") || lowerCmd.includes("здравствуй")) {
+                answer = "Здравствуйте. Все системы работают стабильно.";
+            } else if (lowerCmd.includes("что ты умеешь") || lowerCmd.includes("функции")) {
+                answer = "Я могу отвечать на голосовые команды и управлять интерфейсом.";
+            } else if (lowerCmd.includes("помощь") || lowerCmd.includes("help")) {
+                answer = "Ожидаю дальнейших указаний. Назовите команду.";
+            } else {
+                answer = "Команда не распознана. Повторите запрос.";
+            }
+
+            speakResponse(answer);
+        }
+
+        // --- Синтез речи и анимация ---
+        function speakResponse(text) {
+            wrapper.classList.remove('listening');
+            setStatus('COMPUTING RESPONSE...', 'speaking');
+            
+            // Эффект печатания текста
+            typeWriter(text, 0, () => {
+                // Этот колбэк сработает после завершения печати, 
+                // но мы запускаем голос параллельно, чтобы было похоже на речь
+            });
+
+            const utterance = new SpeechSynthesisUtterance(text);
+            
+            // Попытка найти женский русский голос
+            const ruVoice = voices.find(v => v.lang.includes('ru') && (v.name.includes('Google') || v.name.includes('Milena') || v.name.includes('Irina')));
+            if (ruVoice) {
+                utterance.voice = ruVoice;
+            } else {
+                // Фолбэк на любой русский
+                utterance.voice = voices.find(v => v.lang.includes('ru')); 
+            }
+
+            utterance.rate = 1.1; // Немного быстрее
+            utterance.pitch = 1.0;
+
+            utterance.onend = () => {
+                wrapper.classList.remove('speaking');
+                setStatus('SYSTEM STANDBY', '');
+                btn.disabled = false;
+                btn.textContent = "Активировать снова";
+            };
+
+            synth.speak(utterance);
+        }
+
+        // --- Эффект печатной машинки ---
+        function typeWriter(text, i, cb) {
+            if (i < text.length) {
+                responseDisplay.textContent += text.charAt(i);
+                // Скорость печати (случайная для реализма)
+                setTimeout(() => typeWriter(text, i + 1, cb), Math.random() * 30 + 30);
+            } else {
+                if(cb) cb();
+            }
+        }
+
+        function setStatus(text, stateClass) {
+            statusDisplay.textContent = text;
+            wrapper.className = ''; // Сброс классов
+            if (stateClass) wrapper.classList.add(stateClass);
+        }
+
+        // --- События ---
+        btn.addEventListener('click', () => {
+            try {
+                recognition.start();
+            } catch (e) {
+                // Если уже запущен
+                recognition.stop();
+            }
+        });
+
+    </script>
+</body>
+</html>
