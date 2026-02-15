@@ -3,20 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>F.R.I.D.A.Y. AI</title>
+    <title>F.R.I.D.A.Y. OS</title>
+    <meta name="theme-color" content="#050505">
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkZSSURBWSBBSSIsCiAgInNob3J0X25hbWUiOiAiRlJJREFZIiwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIi01MDUwNSIsCiAgInRoZW1lX2NvbG9yIjogIi0wMGYzZmYiCn0=">
+    
     <style>
         :root {
-            --primary: #00f3ff; /* Основной неон */
-            --secondary: #004d52; /* Тусклый неон */
+            --neon: #00f3ff;
+            --dark-neon: #001a1d;
             --bg: #050505;
-            --alert: #ff003c;
-            --font: 'Segoe UI', 'Courier New', monospace;
         }
 
         body {
-            background-color: var(--bg);
-            color: var(--primary);
-            font-family: var(--font);
+            background: var(--bg);
+            color: var(--neon);
+            font-family: 'Segoe UI', Roboto, sans-serif;
             margin: 0;
             height: 100vh;
             display: flex;
@@ -24,285 +25,230 @@
             align-items: center;
             justify-content: center;
             overflow: hidden;
-            text-transform: uppercase;
         }
 
-        /* --- ФОНОВАЯ СЕТКА --- */
-        body::before {
-            content: "";
+        /* Анимированный фон (Hud-эффект) */
+        #scanner {
             position: absolute;
-            width: 200%;
-            height: 200%;
-            background: 
-                linear-gradient(rgba(0, 243, 255, 0.05) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 243, 255, 0.05) 1px, transparent 1px);
-            background-size: 50px 50px;
-            transform: perspective(500px) rotateX(60deg) translateY(-100px) translateZ(-200px);
-            animation: grid-move 20s linear infinite;
-            z-index: -1;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--neon), transparent);
+            top: 0;
+            opacity: 0.2;
+            animation: scan 4s linear infinite;
         }
 
-        @keyframes grid-move {
-            0% { transform: perspective(500px) rotateX(60deg) translateY(0) translateZ(-200px); }
-            100% { transform: perspective(500px) rotateX(60deg) translateY(50px) translateZ(-200px); }
+        @keyframes scan {
+            0% { top: 0; }
+            100% { top: 100%; }
         }
 
-        /* --- ЯДРО ИНТЕРФЕЙСА (РЕАКТОР) --- */
-        .core-container {
+        /* Ядро */
+        .ai-core {
+            width: 250px;
+            height: 250px;
             position: relative;
-            width: 200px;
-            height: 200px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 40px;
+            cursor: pointer;
         }
 
-        .arc-circle {
+        .layer {
             position: absolute;
             border-radius: 50%;
-            border: 2px solid var(--primary);
-            box-shadow: 0 0 20px var(--primary), inset 0 0 20px var(--primary);
-            transition: 0.3s ease;
+            border: 2px solid var(--neon);
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        .c1 { width: 100%; height: 100%; border: 1px dashed var(--secondary); animation: spin 20s linear infinite; }
-        .c2 { width: 80%; height: 80%; border: 4px solid var(--primary); border-top-color: transparent; border-bottom-color: transparent; animation: spin-rev 5s linear infinite; }
-        .c3 { width: 60%; height: 60%; background: radial-gradient(circle, #fff, var(--primary) 60%, transparent 80%); opacity: 0.8; box-shadow: 0 0 50px var(--primary); }
-
-        /* Состояния анимации */
-        .state-listening .c3 {
-            animation: pulse 2s infinite ease-in-out;
-            background: radial-gradient(circle, #fff, var(--primary) 70%, transparent 90%);
+        .outer { width: 100%; height: 100%; border-style: double; border-width: 6px; animation: rotate 15s linear infinite; opacity: 0.3; }
+        .middle { width: 70%; height: 70%; border-style: dashed; animation: rotate-rev 10s linear infinite; opacity: 0.6; }
+        .inner { 
+            width: 40%; height: 40%; 
+            background: radial-gradient(circle, #fff, var(--neon));
+            box-shadow: 0 0 40px var(--neon);
         }
 
-        .state-speaking .c2 {
-            animation: spin 0.5s linear infinite;
-            border-color: var(--primary);
-            box-shadow: 0 0 40px var(--primary);
-        }
-        .state-speaking .c3 {
-            transform: scale(1.1);
-            background: radial-gradient(circle, #fff, #aaffff 50%, var(--primary) 90%);
-        }
+        /* Состояния */
+        .active .inner { box-shadow: 0 0 80px var(--neon); transform: translate(-50%, -50%) scale(1.2); }
+        .listening .middle { border-color: #fff; opacity: 1; }
 
-        /* --- ТЕКСТОВЫЙ ИНТЕРФЕЙС --- */
-        .ui-panel {
-            width: 80%;
-            max-width: 600px;
+        .interface {
+            margin-top: 50px;
             text-align: center;
-            z-index: 10;
+            z-index: 5;
+            max-width: 90%;
         }
 
-        .status-bar {
-            font-size: 0.8rem;
-            letter-spacing: 3px;
-            color: var(--secondary);
-            margin-bottom: 10px;
-            border-bottom: 1px solid var(--secondary);
-            padding-bottom: 5px;
-        }
-
-        .transcript-box {
-            font-size: 1.2rem;
-            min-height: 1.5em;
-            color: #fff;
+        #status {
+            font-size: 0.7rem;
+            letter-spacing: 5px;
             margin-bottom: 20px;
-            text-shadow: 0 0 5px var(--primary);
+            color: var(--neon);
+            opacity: 0.5;
         }
 
-        .response-box {
-            font-size: 1.1rem;
-            color: var(--primary);
-            min-height: 1.5em;
-            margin-bottom: 30px;
-            font-weight: bold;
+        #output {
+            font-size: 1.4rem;
+            min-height: 2em;
+            text-shadow: 0 0 10px var(--neon);
+            font-weight: 300;
         }
 
-        /* --- КНОПКА ЗАПУСКА --- */
-        #init-btn {
+        .session-timer {
+            font-size: 0.6rem;
+            margin-top: 10px;
+            color: #ff003c;
+        }
+
+        button {
             background: transparent;
-            color: var(--primary);
-            border: 1px solid var(--primary);
-            padding: 10px 30px;
-            font-family: var(--font);
+            border: 1px solid var(--neon);
+            color: var(--neon);
+            padding: 15px 40px;
+            letter-spacing: 3px;
             cursor: pointer;
             transition: 0.3s;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-        #init-btn:hover {
-            background: var(--primary);
-            color: #000;
-            box-shadow: 0 0 20px var(--primary);
         }
 
-        /* --- АНИМАЦИИ --- */
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-        @keyframes spin-rev { 100% { transform: rotate(-360deg); } }
-        @keyframes pulse {
-            0% { transform: scale(0.95); opacity: 0.7; }
-            50% { transform: scale(1.05); opacity: 1; }
-            100% { transform: scale(0.95); opacity: 0.7; }
-        }
+        button:hover { background: var(--neon); color: #000; }
 
+        @keyframes rotate { from { transform: translate(-50%, -50%) rotate(0deg); } to { transform: translate(-50%, -50%) rotate(360deg); } }
+        @keyframes rotate-rev { from { transform: translate(-50%, -50%) rotate(360deg); } to { transform: translate(-50%, -50%) rotate(0deg); } }
     </style>
 </head>
 <body>
 
-    <div class="core-container" id="core">
-        <div class="arc-circle c1"></div>
-        <div class="arc-circle c2"></div>
-        <div class="arc-circle c3"></div>
+    <div id="scanner"></div>
+
+    <div class="ai-core" id="core-trigger">
+        <div class="layer outer"></div>
+        <div class="layer middle"></div>
+        <div class="layer inner"></div>
     </div>
 
-    <div class="ui-panel">
-        <div class="status-bar" id="status">SYSTEM OFFLINE</div>
-        
-        <div class="transcript-box" id="user-text">...</div>
-        <div class="response-box" id="ai-text"></div>
-
-        <button id="init-btn">INIT SYSTEM</button>
+    <div class="interface">
+        <div id="status">SYSTEM OFFLINE</div>
+        <div id="output">НАЖМИТЕ ДЛЯ ИНИЦИАЛИЗАЦИИ</div>
+        <div id="session-info" class="session-timer"></div>
     </div>
 
     <script>
-        // --- ПЕРЕМЕННЫЕ ---
-        const core = document.getElementById('core');
-        const statusEl = document.getElementById('status');
-        const userTextEl = document.getElementById('user-text');
-        const aiTextEl = document.getElementById('ai-text');
-        const initBtn = document.getElementById('init-btn');
+        const core = document.querySelector('.ai-core');
+        const output = document.getElementById('output');
+        const status = document.getElementById('status');
+        const sessionInfo = document.getElementById('session-info');
 
-        // Web Speech API
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        const synth = window.speechSynthesis;
         let recognition;
-        let isSpeaking = false;
+        let synth = window.speechSynthesis;
+        let isSessionActive = false;
+        let sessionTimeout;
 
-        // Имя для активации
-        const WAKE_WORD = "пятница";
-
-        // --- НАСТРОЙКА РАСПОЗНАВАНИЯ ---
-        if (SpeechRecognition) {
-            recognition = new SpeechRecognition();
-            recognition.lang = 'ru-RU';
-            recognition.continuous = false; // Перезапускаем вручную для стабильности
+        // Настройка распознавания
+        if ('webkitSpeechRecognition' in window) {
+            recognition = new webkitSpeechRecognition();
+            recognition.continuous = true;
             recognition.interimResults = false;
-
-            recognition.onstart = () => {
-                if (!isSpeaking) {
-                    statusEl.textContent = "LISTENING // WAITING FOR 'FRIDAY'";
-                    core.classList.remove('state-speaking');
-                    core.classList.add('state-listening');
-                }
-            };
-
-            recognition.onend = () => {
-                // Если мы не говорим, перезапускаем микрофон (бесконечный цикл)
-                if (!isSpeaking) {
-                    recognition.start();
-                }
-            };
+            recognition.lang = 'ru-RU';
 
             recognition.onresult = (event) => {
-                const transcript = event.results[0][0].transcript.toLowerCase().trim();
-                console.log("Heard:", transcript);
-
-                // Логика фильтрации: реагируем только если есть "Пятница"
-                if (transcript.includes(WAKE_WORD)) {
-                    userTextEl.textContent = `"${transcript}"`;
-                    processCommand(transcript);
-                } else {
-                    // Игнорируем шумы и другие разговоры
-                    userTextEl.textContent = "Ignored: " + transcript;
-                }
+                const result = event.results[event.results.length - 1][0].transcript.toLowerCase().trim();
+                handleInput(result);
             };
-        } else {
-            alert("Ваш браузер не поддерживает Web Speech API. Используйте Chrome.");
+
+            recognition.onend = () => { if(!synth.speaking) recognition.start(); };
         }
 
-        // --- ЛОГИКА (МОЗГ) ---
-        function processCommand(fullText) {
-            // Убираем слово "пятница" из команды для анализа
-            const command = fullText.replace(WAKE_WORD, '').trim(); 
+        function handleInput(text) {
+            console.log("Слышу:", text);
             
-            let response = "";
-
-            if (command === "" || command === "." || command === "!") {
-                // Если сказали только "Пятница"
-                const greetings = ["Слушаю.", "На связи.", "Да, босс?", "Системы готовы."];
-                response = greetings[Math.floor(Math.random() * greetings.length)];
-            } 
-            else if (command.includes("привет") || command.includes("здравствуй")) {
-                response = "Здравствуйте. Все системы функционируют в штатном режиме.";
-            } 
-            else if (command.includes("как дела") || command.includes("статус")) {
-                response = "Заряд батареи 100%. Сетевое соединение стабильно. Готова к работе.";
-            }
-            else if (command.includes("что ты умеешь") || command.includes("функции")) {
-                response = "Я управляю интерфейсом, отслеживаю голосовые команды и могу поддержать беседу.";
-            }
-            else if (command.includes("время") || command.includes("который час")) {
-                const now = new Date();
-                response = "Текущее время: " + now.getHours() + " часов " + now.getMinutes() + " минут.";
-            }
-            else if (command.includes("отбой") || command.includes("хватит")) {
-                response = "Перехожу в спящий режим.";
-            }
-            else {
-                response = "Команда не распознана, но я записала её в лог.";
+            // Если сессия не активна, ищем "Привет Пятница"
+            if (!isSessionActive) {
+                if (text.includes("привет пятница") || text.includes("пятница")) {
+                    activateSession();
+                    respond("Слушаю вас. Все системы активированы.");
+                }
+                return;
             }
 
-            speak(response);
+            // Если сессия активна, обрабатываем команды без префикса
+            resetSessionTimer();
+            processCommand(text);
         }
 
-        // --- СИНТЕЗ РЕЧИ ---
-        function speak(text) {
-            if (!text) return;
+        function activateSession() {
+            isSessionActive = true;
+            core.classList.add('active');
+            status.textContent = "SESSION ACTIVE";
+            resetSessionTimer();
+        }
 
-            // 1. Остановить прослушку, чтобы не слышать саму себя
-            isSpeaking = true;
-            recognition.stop(); 
+        function resetSessionTimer() {
+            clearTimeout(sessionTimeout);
+            sessionInfo.textContent = "АКТИВНЫЙ РЕЖИМ: 10 СЕК";
+            sessionTimeout = setTimeout(() => {
+                isSessionActive = false;
+                core.classList.remove('active');
+                status.textContent = "WAITING FOR WAKE WORD";
+                sessionInfo.textContent = "";
+            }, 10000); // 10 секунд на общение без упоминания имени
+        }
+
+        function processCommand(cmd) {
+            if (cmd.includes("кто ты")) {
+                respond("Я Пятница. Ваш персональный ассистент.");
+            } else if (cmd.includes("статус") || cmd.includes("систем")) {
+                respond("Все протоколы функционируют нормально. Критических ошибок не обнаружено.");
+            } else if (cmd.includes("спасибо") || cmd.includes("отбой")) {
+                isSessionActive = false;
+                respond("Всегда пожалуйста. Перехожу в режим ожидания.");
+            } else if (cmd.includes("время")) {
+                respond("Сейчас " + new Date().toLocaleTimeString('ru-RU', {hour: '2-digit', minute:'2-digit'}));
+            } else {
+                respond("Запрос принят. Обрабатываю информацию.");
+            }
+        }
+
+        function respond(text) {
+            recognition.stop();
+            output.textContent = text;
             
-            // 2. Визуализация
-            statusEl.textContent = "PROCESSING RESPONSE...";
-            aiTextEl.textContent = text; // Мгновенный вывод текста
-            core.classList.remove('state-listening');
-            core.classList.add('state-speaking');
-
-            // 3. Подготовка голоса
             const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'ru-RU';
-            utterance.rate = 1.1; // Чуть быстрее
-            utterance.pitch = 0.9; // Чуть ниже (серьезнее)
-
-            // Выбор голоса (приоритет Google Russian)
+            
+            // Настройка "живого" голоса
             const voices = synth.getVoices();
-            const ruVoice = voices.find(v => v.lang.includes('ru') && v.name.includes('Google'));
-            if (ruVoice) utterance.voice = ruVoice;
+            // Ищем лучшие голоса (Google, Microsoft или Apple)
+            const premiumVoice = voices.find(v => v.lang.includes('ru') && (v.name.includes('Google') || v.name.includes('Microsoft'))) 
+                               || voices.find(v => v.lang.includes('ru'));
 
-            // 4. Событие окончания речи
+            utterance.voice = premiumVoice;
+            utterance.pitch = 1.05; // Чуть выше для женского тембра
+            utterance.rate = 1.0;   // Скорость речи
+
+            utterance.onstart = () => core.classList.add('listening');
             utterance.onend = () => {
-                isSpeaking = false;
-                statusEl.textContent = "SYSTEM STANDBY";
-                core.classList.remove('state-speaking');
-                // Снова запускаем микрофон
+                core.classList.remove('listening');
                 recognition.start();
             };
 
             synth.speak(utterance);
         }
 
-        // --- ЗАПУСК ---
-        initBtn.addEventListener('click', () => {
-            initBtn.style.display = 'none'; // Скрываем кнопку
-            // Подгружаем голоса (иногда они грузятся асинхронно)
-            synth.getVoices();
-            
-            // Приветствие при старте
-            speak("Протокол 'Пятница' инициирован. Ожидаю команд.");
-        });
+        core.onclick = () => {
+            if (status.textContent === "SYSTEM OFFLINE") {
+                recognition.start();
+                status.textContent = "WAITING FOR WAKE WORD";
+                output.textContent = "Скажите: 'Привет, Пятница'";
+                
+                // Фиктивный запуск звука (разблокировка аудио в браузере)
+                const silent = new SpeechSynthesisUtterance("");
+                synth.speak(silent);
+            }
+        };
 
+        // Service Worker для PWA
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').catch(() => {});
+        }
     </script>
 </body>
 </html>
