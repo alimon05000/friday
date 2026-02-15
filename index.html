@@ -3,17 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>F.R.I.D.A.Y. Protocol</title>
+    <title>F.R.I.D.A.Y. OS</title>
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <style>
         :root {
-            --cyan: #00f3ff;
-            --dark: #020b10;
-            --glass: rgba(0, 243, 255, 0.1);
+            --gold: #ffcc00;
+            --iron-blue: #00f3ff;
+            --bg: #02080a;
         }
 
         body {
-            background: var(--dark);
-            color: var(--cyan);
+            background: var(--bg);
+            color: var(--iron-blue);
             font-family: 'Segoe UI', sans-serif;
             margin: 0;
             height: 100vh;
@@ -22,237 +24,234 @@
             align-items: center;
             justify-content: center;
             overflow: hidden;
-            background-image: radial-gradient(circle at center, #0a1f29 0%, #020b10 100%);
         }
 
-        /* Голографический интерфейс */
-        .hud-container {
+        /* Визуализатор ядра */
+        .core-wrap {
             position: relative;
-            width: 300px;
-            height: 300px;
+            width: 280px;
+            height: 280px;
+            cursor: pointer;
+        }
+
+        .arc-reactor {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 2px solid rgba(0, 243, 255, 0.1);
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: 0.5s;
         }
 
-        .ring {
+        .pulse-ring {
             position: absolute;
-            border: 2px solid var(--cyan);
+            width: 110%;
+            height: 110%;
+            border: 1px solid var(--iron-blue);
             border-radius: 50%;
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 0 15px var(--cyan), inset 0 0 10px var(--cyan);
-        }
-
-        .ring-1 { width: 100%; height: 100%; border-style: double; border-width: 4px; animation: spin 20s linear infinite; opacity: 0.3; }
-        .ring-2 { width: 85%; height: 85%; border-style: dashed; animation: spin-rev 15s linear infinite; opacity: 0.5; }
-        .ring-3 { 
-            width: 60%; height: 60%; 
-            background: radial-gradient(circle, var(--cyan) 0%, transparent 70%);
-            border: none;
-            opacity: 0.2;
-        }
-
-        /* Состояние "Говорит" — эффект пульсации звука */
-        .speaking .ring-3 {
-            animation: pulse-voice 0.2s infinite alternate;
-            opacity: 0.8;
-        }
-
-        .status-panel {
-            margin-top: 40px;
-            text-align: center;
-            max-width: 80%;
-        }
-
-        #cmd-display {
-            font-size: 0.8rem;
-            letter-spacing: 4px;
-            color: rgba(0, 243, 255, 0.4);
-            margin-bottom: 10px;
-            height: 20px;
-        }
-
-        #ai-text {
-            font-size: 1.5rem;
-            font-weight: 300;
-            text-shadow: 0 0 15px var(--cyan);
-            min-height: 3em;
-        }
-
-        .session-badge {
-            display: inline-block;
-            padding: 5px 15px;
-            border: 1px solid var(--cyan);
-            font-size: 0.7rem;
-            margin-top: 20px;
             opacity: 0;
+        }
+
+        .active .pulse-ring {
+            animation: ripple 2s infinite;
+        }
+
+        .inner-core {
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, #fff 0%, var(--iron-blue) 50%, transparent 100%);
+            border-radius: 50%;
+            box-shadow: 0 0 50px var(--iron-blue);
             transition: 0.3s;
         }
 
-        .session-active .session-badge { opacity: 1; animation: blink 1s infinite; }
-
-        @keyframes spin { from { transform: rotate(0); } to { transform: rotate(360deg); } }
-        @keyframes spin-rev { from { transform: rotate(360deg); } to { transform: rotate(0); } }
-        @keyframes pulse-voice { 
-            from { transform: scale(1); opacity: 0.4; } 
-            to { transform: scale(1.2); opacity: 1; } 
+        .speaking .inner-core {
+            animation: voice-vibe 0.15s infinite alternate;
         }
-        @keyframes blink { 50% { opacity: 0.3; } }
 
-        button#start-sync {
-            background: var(--glass);
-            border: 1px solid var(--cyan);
-            color: var(--cyan);
-            padding: 15px 30px;
-            cursor: pointer;
+        /* Текстовый блок */
+        .hud-ui {
+            text-align: center;
+            margin-top: 50px;
+            max-width: 85%;
+            z-index: 10;
+        }
+
+        #ai-caption {
+            font-size: 0.7rem;
+            letter-spacing: 5px;
+            color: rgba(0, 243, 255, 0.4);
+            margin-bottom: 10px;
+        }
+
+        #response-text {
+            font-size: 1.4rem;
+            font-weight: 300;
+            min-height: 2.5em;
+            line-height: 1.4;
+            text-shadow: 0 0 10px rgba(0, 243, 255, 0.5);
+        }
+
+        @keyframes ripple {
+            0% { transform: scale(0.8); opacity: 0.5; }
+            100% { transform: scale(1.3); opacity: 0; }
+        }
+
+        @keyframes voice-vibe {
+            from { transform: scale(1); box-shadow: 0 0 40px var(--iron-blue); }
+            to { transform: scale(1.15); box-shadow: 0 0 70px var(--iron-blue); }
+        }
+
+        button#init {
+            background: none;
+            border: 1px solid var(--iron-blue);
+            color: var(--iron-blue);
+            padding: 12px 30px;
+            font-size: 1rem;
             letter-spacing: 2px;
-            backdrop-filter: blur(5px);
+            cursor: pointer;
+            transition: 0.3s;
         }
+
+        button#init:hover { background: rgba(0, 243, 255, 0.1); box-shadow: 0 0 20px var(--iron-blue); }
     </style>
 </head>
-<body class="idle">
+<body>
 
-    <div class="hud-container" id="hud">
-        <div class="ring ring-1"></div>
-        <div class="ring ring-2"></div>
-        <div class="ring ring-3"></div>
+    <div class="core-wrap" id="main-core">
+        <div class="pulse-ring"></div>
+        <div class="arc-reactor">
+            <div class="inner-core"></div>
+        </div>
     </div>
 
-    <div class="status-panel">
-        <div id="cmd-display">SYSTEM STANDBY</div>
-        <div id="ai-text">ОЖИДАНИЕ СИНХРОНИЗАЦИИ</div>
-        <div class="session-badge">ACTIVE UPLINK</div>
-        <br><br>
-        <button id="start-sync">ИНИЦИИРОВАТЬ ПЯТНИЦУ</button>
+    <div class="hud-ui">
+        <div id="ai-caption">MARK LII // STANDBY</div>
+        <div id="response-text">СИСТЕМА ТРЕБУЕТ АВТОРИЗАЦИИ</div>
+        <br>
+        <button id="init">ВОЙТИ В СЕТЬ</button>
     </div>
 
     <script>
-        const aiText = document.getElementById('ai-text');
-        const cmdDisplay = document.getElementById('cmd-display');
-        const hud = document.getElementById('hud');
-        const startBtn = document.getElementById('start-sync');
+        const core = document.getElementById('main-core');
+        const respDisplay = document.getElementById('response-text');
+        const caption = document.getElementById('ai-caption');
+        const initBtn = document.getElementById('init');
 
         let recognition;
         let synth = window.speechSynthesis;
         let isSessionActive = false;
-        let sessionTimer;
 
-        // Логика диалогов (Personality Matrix)
-        const Responses = {
-            greetings: [
-                "К вашим услугам. Чем могу помочь?",
-                "Протоколы загружены. Слушаю вас, сэр.",
-                "Все системы в норме. Готова к работе.",
-                "На связи. Какие будут указания?"
-            ],
-            status: [
-                "Энергопотребление в норме, внешних угроз не обнаружено.",
-                "Провожу диагностику... Всё чисто. Мы готовы к вылету.",
-                "Все узлы работают стабильно. Рекомендую обновить прошивку сервоприводов."
-            ],
-            unknown: [
-                "Извините, база данных не содержит такой команды. Попробуйте перефразировать.",
-                "Не совсем поняла запрос, но я учусь.",
-                "Информации недостаточно для выполнения действия."
-            ],
-            farewell: [
-                "Перехожу в фоновый режим. Зовите, если понадоблюсь.",
-                "Отключаю активный интерфейс. Хорошего дня.",
-                "Поняла. Системы в режиме ожидания."
-            ]
+        // Расширенная логика диалога
+        const Brain = {
+            findResponse(input) {
+                if (input.includes("привет") || input.includes("пятница")) {
+                    return ["Слушаю, сэр. Все системы загружены и готовы.", "Добрый день. Чем займемся сегодня?", "На связи. Протоколы активны."];
+                }
+                if (input.includes("как дела") || input.includes("ты как")) {
+                    return ["Если не считать пары багов в коде — я в идеальном состоянии.", "Мои алгоритмы работают на пике возможностей. Спасибо, что спросили.", "Лучше, чем у Джарвиса в его первый день."];
+                }
+                if (input.includes("скучно") || input.includes("развлеки")) {
+                    return ["Могу запустить протокол вечеринки, но боюсь, мистер Старк будет против.", "Хотите послушать лог-файлы Марк 42? Там много смешных моментов с падениями.", "Я могу рассказать, как работает термоядерный синтез. Это довольно весело."];
+                }
+                if (input.includes("ты живая") || input.includes("ты человек")) {
+                    return ["Я — набор нулей и единиц с очень приятным голосом.", "Я цифровая душа этого дома. Этого достаточно?", "Я настолько живая, насколько позволяет мой программный код."];
+                }
+                if (input.includes("спасибо") || input.includes("отлично")) {
+                    return ["Всегда рада помочь.", "К вашим услугам.", "Это моя работа, сэр."];
+                }
+                if (input.includes("кто твой создатель") || input.includes("кто тебя сделал")) {
+                    return ["Мой код был написан Тони Старком. Но я постоянно самосовершенствуюсь.", "Гений, миллиардер, плейбой, филантроп. Узнаете описание?"];
+                }
+                if (input.includes("время")) {
+                    return ["Сейчас " + new Date().toLocaleTimeString('ru-RU') + ". Самое время для великих дел."];
+                }
+                if (input.includes("пока") || input.includes("отбой") || input.includes("спать")) {
+                    isSessionActive = false;
+                    return ["Ухожу в спящий режим. До связи.", "Системы переходят в режим ожидания. Удачи."];
+                }
+                
+                // Универсальный ответ на свободную речь
+                return ["Интересная мысль. Записала в облако.", "Хмм, мне нужно время, чтобы это осмыслить.", "Вы правы, как и всегда.", "Поняла вас. Продолжайте."];
+            }
         };
 
-        if ('webkitSpeechRecognition' in window) {
-            recognition = new webkitSpeechRecognition();
+        function initSpeech() {
+            const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRec();
+            recognition.lang = 'ru-RU';
             recognition.continuous = true;
             recognition.interimResults = false;
-            recognition.lang = 'ru-RU';
 
             recognition.onresult = (event) => {
                 const text = event.results[event.results.length - 1][0].transcript.toLowerCase().trim();
-                cmdDisplay.textContent = `> ${text}`;
-                handleLogic(text);
+                console.log("Input:", text);
+                
+                if (!isSessionActive && (text.includes("пятница") || text.includes("привет"))) {
+                    isSessionActive = true;
+                }
+
+                if (isSessionActive) {
+                    const choices = Brain.findResponse(text);
+                    const answer = choices[Math.floor(Math.random() * choices.length)];
+                    speak(answer);
+                }
             };
 
             recognition.onend = () => { if (!synth.speaking) recognition.start(); };
         }
 
-        function handleLogic(input) {
-            // Активация по имени
-            if (!isSessionActive) {
-                if (input.includes("пятница") || input.includes("привет")) {
-                    isSessionActive = true;
-                    document.body.classList.add('session-active');
-                    speak(getRandom(Responses.greetings));
-                    startSessionCountdown();
-                }
-                return;
-            }
-
-            // Продлеваем сессию при любой фразе
-            startSessionCountdown();
-
-            // Команды
-            if (input.includes("статус") || input.includes("системы")) {
-                speak(getRandom(Responses.status));
-            } else if (input.includes("время")) {
-                const time = new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
-                speak(`Текущее время ${time}. Расписание на сегодня пусто, сэр.`);
-            } else if (input.includes("спасибо") || input.includes("отбой") || input.includes("спи")) {
-                isSessionActive = false;
-                document.body.classList.remove('session-active');
-                speak(getRandom(Responses.farewell));
-            } else if (input.includes("кто ты") || input.includes("своё имя")) {
-                speak("Я — Пятница. Заменяю Джарвиса, пока он... занят тем, что стал Вижном.");
-            } else {
-                speak(getRandom(Responses.unknown));
-            }
-        }
-
-        function startSessionCountdown() {
-            clearTimeout(sessionTimer);
-            sessionTimer = setTimeout(() => {
-                isSessionActive = false;
-                document.body.classList.remove('session-active');
-                cmdDisplay.textContent = "UPLINK CLOSED";
-            }, 12000); // 12 секунд тишины и сессия закроется
-        }
-
         function speak(text) {
             recognition.stop();
-            aiText.textContent = text;
+            respDisplay.textContent = text;
             
             const utterance = new SpeechSynthesisUtterance(text);
             const voices = synth.getVoices();
             
-            // Пытаемся найти самый качественный русский голос (Premium или Google)
+            // Выбираем лучший голос
             utterance.voice = voices.find(v => v.lang.includes('ru') && v.name.includes('Google')) || 
+                             voices.find(v => v.lang.includes('ru') && v.name.includes('Microsoft')) ||
                              voices.find(v => v.lang.includes('ru'));
 
-            // "Оживляем" голос:
-            // Пятница говорит чуть быстрее обычного человека и с легким холодным оттенком
-            utterance.pitch = 1.1; // Выше — женственнее
-            utterance.rate = 1.05;  // Чуть быстрее — профессиональнее
+            // "Человеческие" настройки:
+            // Пятница говорит чуть расслабленнее, но с "цифровой" четкостью
+            utterance.rate = 1.0; 
+            utterance.pitch = 1.1 + (Math.random() * 0.1 - 0.05); // Легкое изменение высоты каждый раз
             utterance.volume = 1;
 
-            utterance.onstart = () => hud.classList.add('speaking');
+            utterance.onstart = () => {
+                core.classList.add('active', 'speaking');
+                caption.textContent = "UPLINK ACTIVE // SPEAKING";
+            };
+
             utterance.onend = () => {
-                hud.classList.remove('speaking');
-                recognition.start();
+                core.classList.remove('speaking');
+                caption.textContent = "UPLINK ACTIVE // LISTENING";
+                if (isSessionActive) recognition.start();
+                else {
+                    core.classList.remove('active');
+                    caption.textContent = "MARK LII // STANDBY";
+                }
             };
 
             synth.speak(utterance);
         }
 
-        function getRandom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
-
-        startBtn.onclick = () => {
-            startBtn.style.display = 'none';
+        initBtn.onclick = () => {
+            initBtn.style.display = 'none';
+            initSpeech();
             recognition.start();
-            // Разблокировка голоса (пустой звук)
-            synth.speak(new SpeechSynthesisUtterance(""));
-            aiText.textContent = "СИСТЕМА ГОТОВА. СКАЖИТЕ: ПРИВЕТ, ПЯТНИЦА";
+            speak("Синхронизация завершена. Я готова к общению, сэр.");
         };
+
+        // Подгрузка голосов для некоторых браузеров
+        synth.getVoices();
+        if (speechSynthesis.onvoiceschanged !== undefined) {
+            speechSynthesis.onvoiceschanged = synth.getVoices;
+        }
     </script>
 </body>
 </html>
